@@ -1,0 +1,15 @@
+[project]
+name = "skin-segmentor"
+version = "0.1.0"
+description = "skin segmentor for  acne, hemoglobin and melanin, implemented based on Mask2Former"
+readme = "README.md"
+authors = [
+    { name = "Wooyeol Lee", email = "wooyeol0519@snu.ac.kr" }
+]
+requires-python = ">=3.11, <3.12"
+dependencies = []
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
