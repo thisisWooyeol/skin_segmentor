@@ -14,9 +14,11 @@ dependencies = [
     "matplotlib>=3.10.1",
     "numpy>=2.2.4",
     "pillow>=11.2.1",
+    "pycocotools>=2.0.8",
     "scipy>=1.15.2",
     "torch>=2.6.0",
     "torchmetrics>=1.7.1",
+    "torchvision>=0.21.0",
     "transformers>=4.51.2",
 ]
 
