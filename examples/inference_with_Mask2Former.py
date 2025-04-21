@@ -1,13 +1,15 @@
 import argparse
+import colorsys
 import logging
 import time
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import torch
 from PIL import Image
-from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
+from transformers import Mask2FormerForUniversalSegmentation, Mask2FormerImageProcessor
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     args = parse_args()
     # Load the processor and model
     model_path = f"facebook/mask2former-swin-{args.backbone_size}-{args.training_dataset}-{args.training_type}"
-    processor = AutoImageProcessor.from_pretrained(model_path)
+    processor = Mask2FormerImageProcessor.from_pretrained(model_path)
     model = Mask2FormerForUniversalSegmentation.from_pretrained(model_path)
     logger.info(f"model device: {model.device}")
 
@@ -94,37 +96,58 @@ if __name__ == "__main__":
 
     # Post-process the outputs
     predicted_map = processor.post_process_semantic_segmentation(
-        outputs, target_sizes=[image.size[::-1]]
+        outputs,
+        target_sizes=[image.size[::-1]],  # type: ignore
     )[0]
     logger.info(predicted_map.shape)
 
-    # Visualize the results
-    color_palette = [
-        list(np.random.choice(range(256), size=3))
-        for _ in range(len(model.config.id2label))
-    ]
+    # Generate a high-contrast complementary palette
+    num_labels = len(model.config.id2label)
+    # We only need to step through half the hues, since each hue gets a complementary partner
+    step = (num_labels + 1) // 2
+    hues = np.linspace(0, 1, step, endpoint=False)
+
+    color_palette = []
+    for h in hues:
+        # primary color in RGB
+        r1, g1, b1 = colorsys.hsv_to_rgb(h, 1.0, 1.0)
+        color_palette.append([int(r1 * 255), int(g1 * 255), int(b1 * 255)])
+        # complementary color (hue + 0.5)
+        if len(color_palette) < num_labels:
+            r2, g2, b2 = colorsys.hsv_to_rgb((h + 0.5) % 1.0, 1.0, 1.0)
+            color_palette.append([int(r2 * 255), int(g2 * 255), int(b2 * 255)])
+
+    # Truncate in case of odd num_labels
+    color_palette = color_palette[:num_labels]
 
     seg = predicted_map
-    color_seg = np.zeros(
-        (seg.shape[0], seg.shape[1], 3), dtype=np.uint8
-    )  # height, width, 3
+    color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)
     palette = np.array(color_palette)
     for label, color in enumerate(palette):
         color_seg[seg == label, :] = color
-    # Convert to BGR
+    # Convert to BGR for consistency if needed
     color_seg = color_seg[..., ::-1]
-    print(np.unique(color_seg))
 
-    # Show image + mask
-    img = np.array(image) * 0.5 + color_seg * 0.5
-    img = img.astype(np.uint8)
+    # Create a 1x2 subplot: original image and semantic mask
+    fig, axes = plt.subplots(1, 2, figsize=(15, 10))
+    axes[0].imshow(image)
+    axes[0].set_title("Original Image")
+    axes[0].axis("off")
 
-    # plt.figure(figsize=(15, 10))
-    # plt.imshow(img)
-    # plt.show()
+    axes[1].imshow(color_seg)
+    axes[1].set_title("Semantic Mask")
+    axes[1].axis("off")
 
-    # Save the image
-    output_image = Image.fromarray(img)
-    output_image.save(
-        f"{CURRENT_DIR}/outputs/image_{args.backbone_size}_{args.training_dataset}_{args.training_type}.png"
+    fig.tight_layout()
+
+    # Ensure output directory exists
+    output_dir = CURRENT_DIR / "outputs"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save the figure
+    output_path = (
+        output_dir
+        / f"image_{args.backbone_size}_{args.training_dataset}_{args.training_type}.png"
     )
+    fig.savefig(output_path, dpi=150)
+    plt.close(fig)
