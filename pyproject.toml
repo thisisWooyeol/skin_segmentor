@@ -7,7 +7,18 @@ authors = [
     { name = "Wooyeol Lee", email = "wooyeol0519@snu.ac.kr" }
 ]
 requires-python = ">=3.11, <3.12"
-dependencies = []
+dependencies = [
+    "accelerate>=1.6.0",
+    "albumentations>=2.0.5",
+    "datasets>=3.5.0",
+    "matplotlib>=3.10.1",
+    "numpy>=2.2.4",
+    "pillow>=11.2.1",
+    "scipy>=1.15.2",
+    "torch>=2.6.0",
+    "torchmetrics>=1.7.1",
+    "transformers>=4.51.2",
+]
 
 
 [build-system]

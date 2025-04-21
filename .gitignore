@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Example images
+examples/inputs/
