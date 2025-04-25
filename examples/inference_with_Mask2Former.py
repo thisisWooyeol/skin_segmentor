@@ -147,7 +147,7 @@ if __name__ == "__main__":
     # Save the figure
     output_path = (
         output_dir
-        / f"image_{args.backbone_size}_{args.training_dataset}_{args.training_type}.png"
+        / f"{args.image_url[:-10]}_{args.backbone_size}_{args.training_dataset}_{args.training_type}.png"
     )
     fig.savefig(output_path, dpi=150)
     plt.close(fig)
