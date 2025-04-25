@@ -26,3 +26,8 @@ dependencies = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+demo = [
+    "gradio>=5.26.0",
+]
