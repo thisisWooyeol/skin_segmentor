@@ -2,7 +2,7 @@ import logging
 import os
 from argparse import ArgumentParser
 
-from datasets import Dataset, DatasetDict, Image
+from datasets import Dataset, DatasetDict, Features, Image
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,7 +30,7 @@ def retreive_image_annotation_paths(
             continue
 
         img_path = os.path.join(dataset_dir, fname)
-        mask_fname = fname.replace("_org_", "_mask_")
+        mask_fname = fname.replace("_org_", "_mask_").replace(".jpg", ".png")
         mask_path = os.path.join(dataset_dir, mask_fname)
 
         if not os.path.isfile(mask_path):
@@ -41,6 +41,22 @@ def retreive_image_annotation_paths(
         mask_paths.append(mask_path)
 
     return image_paths, mask_paths
+
+
+def read_images_raw_bytes(
+    image_paths: list[str], mask_paths: list[str]
+) -> tuple[list[bytes], list[bytes]]:
+    """
+    Read images and masks as raw bytes.
+
+    Returns:
+        image_bytes: list of raw bytes of original images
+        mask_bytes:  list of raw bytes of corresponding mask images
+    """
+    image_bytes = [open(path, "rb").read() for path in image_paths]
+    mask_bytes = [open(path, "rb").read() for path in mask_paths]
+
+    return image_bytes, mask_bytes
 
 
 def create_skin_dataset(
@@ -57,33 +73,22 @@ def create_skin_dataset(
         mask_paths: list of paths to corresponding mask images
         output_dir: name of repo to push the dataset to huggingface.co
     """
-    # Split the dataset into training and validation sets
-    image_paths_train = image_paths[: int(len(image_paths) * (1 - validation_split))]
-    image_paths_val = image_paths[int(len(image_paths) * (1 - validation_split)) :]
-    mask_paths_train = mask_paths[: int(len(mask_paths) * (1 - validation_split))]
-    mask_paths_val = mask_paths[int(len(mask_paths) * (1 - validation_split)) :]
+    # Read paths as raw bytes
+    image_bytes, mask_bytes = read_images_raw_bytes(image_paths, mask_paths)
+    data = {"image": image_bytes, "label": mask_bytes}
 
-    # Create a train/validation split
-    train_dataset = Dataset.from_dict(
+    # Define the features so 'image' & 'mask' are Image columns
+    features = Features(
         {
-            "image": image_paths_train,
-            "label": mask_paths_train,
+            "image": Image(),
+            "label": Image(),
         }
     )
-    train_dataset.cast_column("image", Image())
-    train_dataset.cast_column("label", Image())
 
-    val_dataset = Dataset.from_dict(
-        {
-            "image": image_paths_val,
-            "label": mask_paths_val,
-        }
-    )
-    val_dataset.cast_column("image", Image())
-    val_dataset.cast_column("label", Image())
-
-    # Create a DatasetDict
-    dataset_dict = DatasetDict({"train": train_dataset, "validation": val_dataset})
+    # Build and split a DatasetDict
+    dataset = Dataset.from_dict(data, features=features)
+    split = dataset.train_test_split(test_size=validation_split)
+    dataset_dict = DatasetDict({"train": split["train"], "validation": split["test"]})
 
     # Push to a private repo on Hugging Face Hub
     commit_info = dataset_dict.push_to_hub(
