@@ -56,15 +56,16 @@ def generate_single_mask(
     # ! FIXME: for acne, hemo
     gray = np.max(diff, axis=2).astype(np.uint8)  # max across channels
 
-    # threshold: any non-zero → 255
+    # threshold: any non-zero → 1 (class 1) and background (class 0)
     # NOTE: Use a threshold to ignore small differences
-    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    _, mask = cv2.threshold(gray, threshold, 1, cv2.THRESH_BINARY)
 
     # determine output path
     if out_path is None:
         base = os.path.basename(img1_path)
         out_name = base.replace("_org_", "_mask_")
         out_path = os.path.join(os.path.dirname(img1_path), out_name)
+        out_path = out_path.replace(".jpg", ".png")
 
     # save mask
     cv2.imwrite(out_path, mask)

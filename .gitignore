@@ -12,3 +12,7 @@ wheels/
 # Example images
 examples/inputs/
 data/
+
+# log outputs
+checkpoints/
+wandb/
