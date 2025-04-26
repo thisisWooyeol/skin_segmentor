@@ -31,9 +31,9 @@ def _load_model(task_type: TASK_TYPE):
     if task_type == "acne":
         checkpoint = "checkpoints/segformer-b5-acne-reduce-labels-focal+dice"
     elif task_type == "hemo":
-        raise NotImplementedError("Hemo model not implemented yet.")
+        checkpoint = "checkpoints/segformer-b5-hemo-reduce-labels-focal+dice"
     elif task_type == "mela":
-        raise NotImplementedError("Mela model not implemented yet.")
+        checkpoint = "checkpoints/segformer-b5-mela-reduce-labels-focal+dice"
 
     device = "cuda"
     model = AutoModelForSemanticSegmentation.from_pretrained(
@@ -93,7 +93,7 @@ theme = gr.themes.Soft(
 
 with gr.Blocks(theme=theme) as demo:
     with gr.Column(elem_classes="header"):
-        gr.Markdown("# 🔍 Aramhuvis x SNU: Segment Skin Disease")
+        gr.Markdown("# 🔍 Aramhuvis x SNU: Segment Your Skin!")
         gr.Markdown("### Wooyeol Lee, Minseo Kim, Byeongho Park")
         gr.Markdown("[[GitHub](https://github.com/thisiswooyeol/skin_segmentor)]")
 
@@ -120,6 +120,10 @@ with gr.Blocks(theme=theme) as demo:
             examples=[
                 ["demo/assets/acne.jpg", "acne"],
                 ["demo/assets/acne_from_train.jpg", "acne"],
+                ["demo/assets/hemo.jpg", "hemo"],
+                ["demo/assets/hemo_from_train.jpg", "hemo"],
+                ["demo/assets/mela.jpg", "mela"],
+                ["demo/assets/mela_from_train.jpg", "mela"],
             ],
             cache_examples=True,  # Cache examples for faster loading
             cache_mode="lazy",
