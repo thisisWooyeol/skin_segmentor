@@ -1,12 +1,24 @@
 # Skin Segmentor with Mask2Former
 
-This repository provides a skin segmentor based on the Mask2Former framework. As an extension of the original Mask2Former, this implementation is specifically designed for three classes: acne, hemoglobin and melanin. 
+This repository provides a skin segmentor based on the SegFormer model. As an extension of the original SegFormer, this implementation is specifically designed for three classes: acne, hemoglobin and melanin. 
+
+<br>
+
+# TODO
+- [ ] work with bigger dataset (currently used toy dataset)
+- [ ] use larger batch size & more epochs
+- [ ] add quantitative evaluation scripts
+
+<br>
 
 # Get Started
 ## 0. Installation
 
+Please install `uv` from [here](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already.
+
 ```bash
 git clone https://github.com/thisisWooyeol/skin_segmentor.git
+
 cd skin_segmentor
 uv sync
 ```
@@ -22,10 +34,60 @@ Recommended threshold value for each class is as follows:
 python src/utils/generate_mask.py --dataset_dir <dataset_dir> --threshold <threshold>
 ```
 
+## 2. Create custom skin dataset
+
+```bash
+python src/utils/create_skin_dataset.py --dataset_dir <dataset_dir> --output_dir <output_dir>
+```
+
+Then create `id2label.json` file and upload it to the HF dataset repo. It should look like follows, where `<type>` is either `acne`, `hemo` or `mela`.
+
+```json
+{
+    "0": "background",
+    "1": <type>,
+}
+```
+
+## 3. Train
+
+Example scripts are provided in `src/skin_segmentor/train_segformer_ss.sh`. Or you can run the training script directly as follows:
+
+```bash
+accelerate launch src/skin_segmentor/train_segformer_ss.py \
+    --model_name_or_path nvidia/mit-b5 \
+    --dataset_name thisiswooyeol/skin_acne \
+    --do_reduce_labels \
+    --output_dir checkpoints/segformer-b5-acne-reduce-labels-focal+dice \
+    --num_train_epochs 100 \
+    --seed 42 \
+    --with_tracking \
+    --report_to wandb 
+```
+
+## 4. Evaluate
+
+TODO: add quantitative evaluation
+
+<br>
+
+# Interactive demo
+
+By running gradio app, you can run inference with your own image.
+
+```bash
+python demo/app.py
+```
+
+<br>
 
 # References
 
-[1] [Masked-attention Mask Transformer for Universal Image Segmentation](https://arxiv.org/abs/2112.01527)
+[1] [SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers
+](https://arxiv.org/abs/2105.15203)
+[2] [Semantic Segmentation examples with Hugging Face Transformers](https://github.com/huggingface/transformers/tree/main/examples/pytorch/semantic-segmentation)
+
+<br>
 
 # Acknowledgements
 
@@ -34,3 +96,5 @@ This project is supported by the SNU Creative Integrated Design 2 class and [Ara
 
 - Minseo Kim
 - Byeongho Park
+
+Training and evaluation scripts are based on transformers examples. Thanks to Hugging Face for providing the codebase.
