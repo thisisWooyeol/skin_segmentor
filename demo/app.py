@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 SKIN_PALETTE = [
     # Skin palette that maps each class to RGB values.
-    [220, 220, 220],  # background
-    [120, 120, 120],  # skin
+    [120, 120, 120],  # background
+    [220, 220, 220],  # skin
 ]
 TASK_TYPE = Literal["acne", "hemo", "mela"]
 
@@ -29,7 +29,7 @@ def run_inference(image: Image.Image, task_type: TASK_TYPE):
 
 def _load_model(task_type: TASK_TYPE):
     if task_type == "acne":
-        checkpoint = "checkpoints/segformer-b5-acne-reduce-labels"
+        checkpoint = "checkpoints/segformer-b5-acne-reduce-labels-focal+dice"
     elif task_type == "hemo":
         raise NotImplementedError("Hemo model not implemented yet.")
     elif task_type == "mela":
@@ -59,6 +59,7 @@ def _process_image(image: Image.Image, model, image_processor):
         outputs, target_sizes=[image.size[::-1]]
     )[0]
     predicted_segmentation_map = predicted_segmentation_map.cpu().numpy()
+    logger.info(f"Predicted segmentation map shape: {predicted_segmentation_map}")
 
     color_seg = np.zeros(
         (predicted_segmentation_map.shape[0], predicted_segmentation_map.shape[1], 3),
