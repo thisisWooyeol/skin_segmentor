@@ -1,7 +1,7 @@
 [project]
 name = "skin-segmentor"
 version = "0.1.0"
-description = "skin segmentor for  acne, hemoglobin and melanin, implemented based on Mask2Former"
+description = "skin segmentor for  acne, hemoglobin and melanin, implemented based on SegFormer"
 readme = "README.md"
 authors = [
     { name = "Wooyeol Lee", email = "wooyeol0519@snu.ac.kr" }
@@ -9,7 +9,7 @@ authors = [
 requires-python = ">=3.11, <3.12"
 dependencies = [
     "accelerate>=1.6.0",
-    "albumentations>=2.0.5",
+    "albumentations==1.3.1",
     "datasets>=3.5.0",
     "evaluate>=0.4.3",
     "matplotlib>=3.10.1",
@@ -17,9 +17,9 @@ dependencies = [
     "pillow>=11.2.1",
     "pycocotools>=2.0.8",
     "scipy>=1.15.2",
-    "torch>=2.6.0",
+    "torch==2.6.0",
     "torchmetrics>=1.7.1",
-    "torchvision>=0.21.0",
+    "torchvision==0.21.0",
     "transformers>=4.51.2",
     "wandb>=0.19.10",
 ]
