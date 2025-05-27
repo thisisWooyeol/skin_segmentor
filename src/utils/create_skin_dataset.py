@@ -90,12 +90,9 @@ def create_skin_dataset(
     split = dataset.train_test_split(test_size=validation_split)
     dataset_dict = DatasetDict({"train": split["train"], "validation": split["test"]})
 
-    # Push to a private repo on Hugging Face Hub
-    commit_info = dataset_dict.push_to_hub(
-        repo_id=output_dir,
-        private=True,
-    )
-    logger.info(f"Dataset pushed to Hugging Face Hub: {commit_info}")
+    # Save dataset to local path
+    dataset_dict.save_to_disk(dataset_dict_path=output_dir)
+    logger.info(f"Successfully saved dataset into {output_dir}")
 
 
 def main():
@@ -110,7 +107,7 @@ def main():
     parser.add_argument(
         "--output_dir",
         required=True,
-        help="Name of repo to push the dataset to huggingface.co",
+        help="Name of local path to save the dataset",
     )
     parser.add_argument(
         "--validation_split",
