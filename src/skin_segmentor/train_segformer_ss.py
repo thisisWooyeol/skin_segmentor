@@ -14,6 +14,7 @@
 """Finetuning any 🤗 Transformers model supported by AutoModelForSemanticSegmentation for semantic segmentation."""
 
 import argparse
+import cv2
 import json
 import math
 import os
@@ -29,7 +30,7 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
-from datasets import load_dataset
+from datasets import load_from_disk
 from huggingface_hub import HfApi, hf_hub_download
 from torch.utils.data import DataLoader
 from torchmetrics.functional.segmentation import dice_score
@@ -82,10 +83,9 @@ def parse_args():
         default="nvidia/mit-b0",
     )
     parser.add_argument(
-        "--dataset_name",
+        "--dataset_path",
         type=str,
-        help="Name of the dataset on the hub.",
-        default="segments/sidewalk-semantic",
+        help="Path to the local dataset.",
     )
     parser.add_argument(
         "--do_reduce_labels",
@@ -238,6 +238,17 @@ def parse_args():
             "Only applicable when `--with_tracking` is passed."
         ),
     )
+    parser.add_argument(
+        "--mixed_precision",
+        type=str,
+        default=None,
+        choices=["no", "fp16", "bf16"],
+        help=(
+            "Whether to use mixed precision. Choose between fp16 and bf16 (bfloat16). Bf16 requires PyTorch >="
+            " 1.10.and an Nvidia Ampere GPU.  Default to the value of accelerate config of the current system or the"
+            " flag passed with the `accelerate.launch` command. Use this argument to override the accelerate config."
+        ),
+    )
     args = parser.parse_args()
 
     # Sanity checks
@@ -318,6 +329,7 @@ def main():
 
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
+        mixed_precision=args.mixed_precision,
         **accelerator_log_kwargs,
     )
 
@@ -362,21 +374,15 @@ def main():
 
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
-    dataset = load_dataset(
-        args.dataset_name,
-        cache_dir=args.cache_dir,
-        trust_remote_code=args.trust_remote_code,
+    dataset = load_from_disk(
+        args.dataset_path,
+#        cache_dir=args.cache_dir,
+#        trust_remote_code=args.trust_remote_code,
     )
 
     # Prepare label mappings.
     # We'll include these in the model's config to get human readable labels in the Inference API.
-    id2label = json.load(
-        open(
-            hf_hub_download(
-                repo_id=args.dataset_name, filename="id2label.json", repo_type="dataset"
-            )
-        )
-    )
+    id2label = json.load(open(f"{args.dataset_path}/id2label.json"))
     id2label = {int(k): v for k, v in id2label.items()}
     label2id = {v: k for k, v in id2label.items()}
 
@@ -413,7 +419,12 @@ def main():
         [
             # pad image with 255, because it is ignored by loss
             A.PadIfNeeded(
-                min_height=height, min_width=width, border_mode=0, fill=255, p=1.0
+                min_height=height,
+                min_width=width,
+    		value=0,                # Image padding value
+    		mask_value=255,         # Special value for ignored pixels
+    		border_mode=cv2.BORDER_CONSTANT,
+    		p=1.0,
             ),
             A.RandomCrop(height=height, width=width, p=1.0),
             A.HorizontalFlip(p=0.5),
@@ -641,6 +652,9 @@ def main():
                 lr_scheduler.step()
                 optimizer.zero_grad()
 
+	    # log train loss
+            accelerator.log({"train_loss": loss.item()}, step=completed_steps)
+
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
                 progress_bar.update(1)
@@ -714,14 +728,12 @@ def main():
         if args.with_tracking:
             accelerator.log(
                 {
-                    "mean_iou": eval_metrics["mean_iou"],
-                    "mean_accuracy": eval_metrics["mean_accuracy"],
-                    "overall_accuracy": eval_metrics["overall_accuracy"],
-                    "train_loss": total_loss.item() / len(train_dataloader),
-                    "epoch": epoch,
-                    "step": completed_steps,
+                    "mean_iou_per_epoch": eval_metrics["mean_iou"],
+                    "mean_accuracy_per_epoch": eval_metrics["mean_accuracy"],
+                    "overall_accuracy_per_epoch": eval_metrics["overall_accuracy"],
+                    "train_loss_per_epoch": total_loss.item() / len(train_dataloader),
                 },
-                step=completed_steps,
+		step=completed_steps,
             )
 
         if args.push_to_hub and epoch < args.num_train_epochs - 1:
