@@ -29,11 +29,14 @@ def run_inference(image: Image.Image, task_type: TASK_TYPE):
 
 def _load_model(task_type: TASK_TYPE):
     if task_type == "acne":
-        checkpoint = "checkpoints/segformer-b5-acne-reduce-labels-focal+dice"
+#        checkpoint = "checkpoints/segformer-b5-acne-reduce-labels-focal+dice"
+        checkpoint = "checkpoints/segformer-b5-focal+dice-acne50kdata-10ksteps"
     elif task_type == "hemo":
-        checkpoint = "checkpoints/segformer-b5-hemo-reduce-labels-focal+dice"
+#        checkpoint = "checkpoints/segformer-b5-hemo-reduce-labels-focal+dice"
+        checkpoint = "checkpoints/segformer-b5-focal+dice-hemo6.6kdata-10ksteps" # hemo with threshold 10
     elif task_type == "mela":
-        checkpoint = "checkpoints/segformer-b5-mela-reduce-labels-focal+dice"
+#        checkpoint = "checkpoints/segformer-b5-mela-reduce-labels-focal+dice"
+        checkpoint = "checkpoints/segformer-b5-focal+dice-mela32kdata-10ksteps"  # mela with threshold 22
 
     device = "cuda"
     model = AutoModelForSemanticSegmentation.from_pretrained(
@@ -130,4 +133,4 @@ with gr.Blocks(theme=theme) as demo:
         )
 
 if __name__ == "__main__":
-    demo.queue().launch()
+    demo.queue().launch(share=True)

@@ -5,8 +5,8 @@ This repository provides a skin segmentor based on the SegFormer model. As an ex
 <br>
 
 # TODO
-- [ ] work with bigger dataset (currently used toy dataset)
-- [ ] use larger batch size & more epochs
+- [x] work with bigger dataset (currently used toy dataset)
+- [x] use larger batch size & more epochs
 - [ ] add quantitative evaluation scripts
 
 <br>
@@ -27,8 +27,8 @@ uv sync
 
 Recommended threshold value for each class is as follows:
 - acne: 20
-- hemo: 7
-- mela: 20
+- hemo: 10
+- mela: 22
 
 ```bash
 python src/utils/generate_mask.py --dataset_dir <dataset_dir> --threshold <threshold>
@@ -56,10 +56,11 @@ Example scripts are provided in `src/skin_segmentor/train_segformer_ss.sh`. Or y
 ```bash
 accelerate launch src/skin_segmentor/train_segformer_ss.py \
     --model_name_or_path nvidia/mit-b5 \
-    --dataset_name thisiswooyeol/skin_acne \
+    --dataset_path ../dataset/acne \
     --do_reduce_labels \
-    --output_dir checkpoints/segformer-b5-acne-reduce-labels-focal+dice \
-    --num_train_epochs 100 \
+    --output_dir checkpoints/segformer-b5-focal+dice-acne50kdata-10ksteps \
+    --max_train_steps 10000 \
+    --checkpointing_steps epoch \
     --seed 42 \
     --with_tracking \
     --report_to wandb 
