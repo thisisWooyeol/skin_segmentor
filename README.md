@@ -147,6 +147,82 @@ python src/evaluation_utils/evaluate.py \
 
 <br>
 
+## 5. Results
+
+### Quantitative results
+
+The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets.
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th rowspan="2">Dataset</th>
+      <th colspan="5">Ours</th>
+      <th colspan="5">Baseline</th>
+    </tr>
+    <tr>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Accuracy</th>
+      <th>Dice</th>
+      <th>IoU</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Accuracy</th>
+      <th>Dice</th>
+      <th>IoU</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Acne</td>
+      <td>0.7284</td>
+      <td>0.1677</td>
+      <td>0.9597</td>
+      <td>0.2726</td>
+      <td>0.1578</td>
+      <td>0.6624</td>
+      <td>0.1690</td>
+      <td>0.9587</td>
+      <td>0.2693</td>
+      <td>0.1556</td>
+    </tr>
+    <tr>
+      <td>Hemo</td>
+      <td>0.7357</td>
+      <td>0.4021</td>
+      <td>0.8281</td>
+      <td>0.5200</td>
+      <td>0.3514</td>
+      <td>0.7340</td>
+      <td>0.3857</td>
+      <td>0.8254</td>
+      <td>0.5057</td>
+      <td>0.3384</td>
+    </tr>
+    <tr>
+      <td>Mela</td>
+      <td>0.2026</td>
+      <td>0.3731</td>
+      <td>0.8916</td>
+      <td>0.2626</td>
+      <td>0.1512</td>
+      <td>0.2237</td>
+      <td>0.2469</td>
+      <td>0.9167</td>
+      <td>0.2347</td>
+      <td>0.1330</td>
+    </tr>
+  </tbody>
+</table>
+
+Overall, our approach achieves higher Dice and IoU scores across all three datasets compared to the baseline. 
+The improvements are modest for the acne set (+0.003 Dice, +0.002 IoU) 
+but more noticeable for the hemo (+0.014 Dice, +0.013 IoU) and mela (+0.028 Dice, +0.018 IoU) sets.
+
+
+<br>
+
 # Interactive demo
 
 By running gradio app, you can run inference with your own image.
