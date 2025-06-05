@@ -166,7 +166,6 @@ The following table summarizes the evaluation metrics for our model compared to 
       <th>Accuracy</th>
       <th>Dice</th>
       <th>IoU</th>
-
       <th>Precision</th>
       <th>Recall</th>
       <th>Accuracy</th>
@@ -174,7 +173,6 @@ The following table summarizes the evaluation metrics for our model compared to 
       <th>IoU</th>
     </tr>
   </thead>
-
   <tbody>
     <tr>
       <td>Acne</td>
@@ -183,14 +181,12 @@ The following table summarizes the evaluation metrics for our model compared to 
       <td>0.9597</td>
       <td>0.2726</td>
       <td>0.1578</td>
-
       <td>0.6624</td>
       <td>0.1690</td>
       <td>0.9587</td>
       <td>0.2693</td>
       <td>0.1556</td>
     </tr>
-
     <tr>
       <td>Hemo</td>
       <td>0.7357</td>
@@ -198,14 +194,12 @@ The following table summarizes the evaluation metrics for our model compared to 
       <td>0.8281</td>
       <td>0.5200</td>
       <td>0.3514</td>
-
       <td>0.7340</td>
       <td>0.3857</td>
       <td>0.8254</td>
       <td>0.5057</td>
       <td>0.3384</td>
     </tr>
-
     <tr>
       <td>Mela</td>
       <td>0.2026</td>
@@ -213,7 +207,6 @@ The following table summarizes the evaluation metrics for our model compared to 
       <td>0.8916</td>
       <td>0.2626</td>
       <td>0.1512</td>
-
       <td>0.2237</td>
       <td>0.2469</td>
       <td>0.9167</td>
