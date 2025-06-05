@@ -68,7 +68,19 @@ accelerate launch src/skin_segmentor/train_segformer_ss.py \
 
 ## 4. Evaluate
 
-TODO: add quantitative evaluation
+If there is no GT annotations available, make it with annotation gui:
+
+```bash
+python src/annotation_utils/annotation_gui.py --image_folder ../testcases/acne_test/image/
+
+python src/annotation_utils/annotation_gui.py --image_folder ../testcases/hemo_test/image/ 
+
+python src/annotation_utils/annotation_gui.py --image_folder ../testcases/mela_test/image/
+```
+
+Grayscale segmentation masks will be saved at `testcases/<type>_test/label/` folder.
+
+
 
 <br>
 
