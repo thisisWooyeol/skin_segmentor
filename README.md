@@ -74,6 +74,8 @@ accelerate launch src/skin_segmentor/train_segformer_ss.py \
 
 ## 4. Evaluate
 
+### A. Create GT labels
+
 If there is no GT annotations available, make it with annotation gui:
 
 ```bash
@@ -86,6 +88,61 @@ python src/annotation_utils/annotation_gui.py --image_folder ../testcases/mela_t
 
 Grayscale segmentation masks will be saved at `testcases/<type>_test/label/` folder.
 
+
+### B. Create Ours predictions
+
+Run
+
+```bash
+python src/skin_segmentor/inference_segformer_ss.py \
+  --checkpoint checkpoints/segformer-b5-focal+dice-acne50kdata-10ksteps \
+  --input_dir ../testcases/acne_test/image \
+  --output_dir ../testcases/acne_test/ours_pred
+
+python src/skin_segmentor/inference_segformer_ss.py \
+  --checkpoint checkpoints/segformer-b5-focal+dice-hemo6.6kdata-10ksteps \
+  --input_dir ../testcases/hemo_test/image \
+  --output_dir ../testcases/hemo_test/ours_pred
+
+python src/skin_segmentor/inference_segformer_ss.py \
+  --checkpoint checkpoints/segformer-b5-focal+dice-mela32kdata-10ksteps \
+  --input_dir ../testcases/mela_test/image \
+  --output_dir ../testcases/mela_test/ours_pred
+```
+
+### C. Get evaluation metrics
+
+To evalutate ours:
+
+```bash
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/acne_test/label/ \
+  --pred_dir ../testcases/acne_test/ours_pred/
+
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/hemo_test/label/ \
+  --pred_dir ../testcases/hemo_test/ours_pred/
+
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/mela_test/label/ \
+  --pred_dir ../testcases/mela_test/ours_pred/
+````
+
+To evaluate baseline:
+
+```
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/acne_test/label/ \
+  --pred_dir ../testcases/acne_test/baseline_pred/
+
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/hemo_test/label/ \
+  --pred_dir ../testcases/hemo_test/baseline_pred/
+
+python src/evaluation_utils/evaluate.py \
+  --gt_dir ../testcases/mela_test/label/ \
+  --pred_dir ../testcases/mela_test/baseline_pred/
+```
 
 
 <br>
