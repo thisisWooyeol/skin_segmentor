@@ -67,7 +67,7 @@ def main():
             outputs, target_sizes=[image.size[::-1]]
         )[0]
         mask = (mask.cpu().numpy() * 255).astype("uint8")
-        out_path = Path(args.output_dir) / f"{img_path.stem}.png"
+        out_path = Path(args.output_dir) / f"{img_path.stem}_mask.png"
         Image.fromarray(mask).save(out_path)
 
 
