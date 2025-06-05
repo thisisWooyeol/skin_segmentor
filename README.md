@@ -216,14 +216,10 @@ The following table summarizes the evaluation metrics for our model compared to 
   </tbody>
 </table>
 
+Overall, our approach achieves higher Dice and IoU scores across all three datasets compared to the baseline. 
+The improvements are modest for the acne set (+0.003 Dice, +0.002 IoU) 
+but more noticeable for the hemo (+0.014 Dice, +0.013 IoU) and mela (+0.028 Dice, +0.018 IoU) sets.
 
-| Dataset | Precision (Ours) | Recall (Ours) | Accuracy (Ours) | Dice (Ours) | IoU (Ours) | Precision (Baseline) | Recall (Baseline) | Accuracy (Baseline) | Dice (Baseline) | IoU (Baseline) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Acne | 0.7284 | 0.1677 | 0.9597 | 0.2726 | 0.1578 | 0.6624 | 0.1690 | 0.9587 | 0.2693 | 0.1556 |
-| Hemo | 0.7357 | 0.4021 | 0.8281 | 0.5200 | 0.3514 | 0.7340 | 0.3857 | 0.8254 | 0.5057 | 0.3384 |
-| Mela | 0.2026 | 0.3731 | 0.8916 | 0.2626 | 0.1512 | 0.2237 | 0.2469 | 0.9167 | 0.2347 | 0.1330 |
-
-Overall, our approach achieves higher Dice and IoU scores across all three datasets compared to the baseline. The improvements are modest for the acne set (+0.003 Dice, +0.002 IoU) but more noticeable for the hemo (+0.014 Dice, +0.013 IoU) and mela (+0.028 Dice, +0.018 IoU) sets.
 
 <br>
 
