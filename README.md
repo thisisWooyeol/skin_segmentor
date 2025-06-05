@@ -34,6 +34,9 @@ Recommended threshold value for each class is as follows:
 python src/utils/generate_mask.py --dataset_dir <dataset_dir> --threshold <threshold>
 ```
 
+Here we used `../data_raw/<type>` for `--dataset_dir` argument.
+
+
 ## 2. Create custom skin dataset
 
 ```bash
@@ -48,6 +51,9 @@ Then create `id2label.json` file and upload it to the HF dataset repo. It should
     "1": <type>,
 }
 ```
+
+Here we used `../data_raw/<type>` for `--dataset_dir` argument and `../dataset/<type>` for `--output_dir` argument.
+
 
 ## 3. Train
 
