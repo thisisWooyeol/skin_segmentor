@@ -147,9 +147,7 @@ python src/evaluation_utils/evaluate.py \
 
 <br>
 
-## 5. Results
-
-### Quantitative results
+# Quantitative results
 
 The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets.
 
