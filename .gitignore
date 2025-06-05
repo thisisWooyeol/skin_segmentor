@@ -16,6 +16,7 @@ data/
 # log outputs
 checkpoints/
 wandb/
+*.log
 
 # Gradio temporary files
 .gradio/
