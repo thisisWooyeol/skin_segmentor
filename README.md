@@ -42,7 +42,7 @@ Then create `id2label.json` file and upload it to the HF dataset repo. It should
 ```json
 {
     "0": "background",
-    "1": <type>,
+    "1": "<type>",
 }
 ```
 
@@ -143,7 +143,7 @@ python src/evaluation_utils/evaluate.py \
 
 # Quantitative results
 
-The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets.
+The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets: Acne, Hemo (hemoglobin), and Mela (melanin).
 
 <table border="1" cellpadding="6" cellspacing="0">
   <thead>
@@ -208,10 +208,13 @@ The following table summarizes the evaluation metrics for our model compared to 
   </tbody>
 </table>
 
-Overall, our approach achieves higher Dice and IoU scores across all three datasets compared to the baseline. 
-The improvements are modest for the acne set (+0.003 Dice, +0.002 IoU) 
-but more noticeable for the hemo (+0.014 Dice, +0.013 IoU) and mela (+0.028 Dice, +0.018 IoU) sets.
+Overall, our approach achieves higher Dice and IoU scores across all three datasets compared to the baseline. These two metrics, which measure the overlap between the prediction and the ground truth, are primary indicators of segmentation quality. The improvements are modest for the acne set (+0.003 Dice, +0.002 IoU) but more noticeable for the hemo (+0.014 Dice, +0.013 IoU) and mela (+0.028 Dice, +0.018 IoU) sets.
 
+A closer analysis reveals how these improvements were achieved for each specific class:
+
+- Acne: The primary performance gain for the "Ours" model is driven by a significant increase in precision (0.7284 vs. 0.6624 for the baseline), indicating that our model is more accurate in its positive predictions and makes fewer false positive errors.
+
+- Hemo & Mela: For these datasets, the performance improvement is led by an increase in recall. This is especially noticeable in the Mela set, where recall jumped to 0.3731 from the baseline's 0.2469. This shows that the "Ours" model is substantially better at detecting the positive regions (True Positives), which was the key factor in improving the overall Dice and IoU scores for these more challenging segmentation tasks.
 
 <br>
 
@@ -228,7 +231,7 @@ python demo/app.py
 # References
 
 [1] [SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers
-](https://arxiv.org/abs/2105.15203)
+](https://arxiv.org/abs/2105.15203) \
 [2] [Semantic Segmentation examples with Hugging Face Transformers](https://github.com/huggingface/transformers/tree/main/examples/pytorch/semantic-segmentation)
 
 <br>
