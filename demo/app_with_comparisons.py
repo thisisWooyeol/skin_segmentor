@@ -20,7 +20,7 @@ SKIN_PALETTE = [
 ]
 TASK_TYPE = Literal["acne", "hemo", "mela"]
 
-ASSETS_ROOT = Path("assets")
+ASSETS_ROOT = Path("demo/assets")
 DATASET_NAMES = {
     "acne": "acne_test",
     "hemo": "hemo_test",
