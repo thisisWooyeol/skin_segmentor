@@ -6,11 +6,12 @@ This repository provides a skin segmentor based on the SegFormer model. As an ex
 <br>
 
 
-# Interactive Demo
+## Interactive demo
 
 By running gradio app, you can run inference with your own image.
 
 ```bash
+uv sync --group demo
 python demo/app.py
 ```
 
@@ -18,8 +19,8 @@ python demo/app.py
 <br>
 
 
-# Get Started
-## 0. Installation
+## Get started
+### 0. Installation
 
 Please install `uv` from [here](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already.
 
@@ -30,7 +31,7 @@ cd skin_segmentor
 uv sync
 ```
 
-## 1. Preprocess mask
+### 1. Preprocess mask
 
 Recommended threshold value for each class is as follows:
 - acne: 20
@@ -44,7 +45,7 @@ python src/utils/generate_mask.py --dataset_dir <dataset_dir> --threshold <thres
 Here we used `../data_raw/<type>` for `--dataset_dir` argument.
 
 
-## 2. Create custom skin dataset
+### 2. Create custom skin dataset
 
 ```bash
 python src/utils/create_skin_dataset.py --dataset_dir <dataset_dir> --output_dir <output_dir>
@@ -62,7 +63,7 @@ Then create `id2label.json` file and upload it to the HF dataset repo. It should
 Here we used `../data_raw/<type>` for `--dataset_dir` argument and `../dataset/<type>` for `--output_dir` argument.
 
 
-## 3. Train
+### 3. Train
 
 Example scripts are provided in `src/skin_segmentor/train_segformer_ss.sh`. Or you can run the training script directly as follows:
 
@@ -79,9 +80,9 @@ accelerate launch src/skin_segmentor/train_segformer_ss.py \
     --report_to wandb 
 ```
 
-## 4. Evaluate
+### 4. Evaluate
 
-### A. Create GT labels
+#### A. Create GT labels
 
 If there is no GT annotations available, make it with annotation gui:
 
@@ -96,7 +97,7 @@ python src/annotation_utils/annotation_gui.py --image_folder ../testcases/mela_t
 Grayscale segmentation masks will be saved at `testcases/<type>_test/label/` folder.
 
 
-### B. Create Ours predictions
+#### B. Create Ours predictions
 
 Run
 
@@ -117,7 +118,7 @@ python src/skin_segmentor/inference_segformer_ss.py \
   --output_dir ../testcases/mela_test/ours_pred
 ```
 
-### C. Get evaluation metrics
+#### C. Get evaluation metrics
 
 To evalutate ours:
 
@@ -155,7 +156,7 @@ python src/evaluation_utils/evaluate.py \
 <br>
 
 
-# Quantitative Results
+## Quantitative results
 
 The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets: Acne, Hemo (hemoglobin), and Mela (melanin).
 
@@ -234,7 +235,7 @@ A closer analysis reveals how these improvements were achieved for each specific
 <br>
 
 
-# Qualitative Results with Gradio
+## Qualitative results with gradio app
 
 By running the gradio app, you can visualize the qualitative results of our model compared to the baseline.
 
@@ -247,7 +248,7 @@ python demo/app_with_comparisons.py
 <br>
 
 
-# Limitations and Future Work
+## Limitations and future work
 
 ![Limitations](./asset/limitation.png)
 While our model shows promising results, poor label quality for training leads to suboptimal performance. Note that SegFormer model is trained with baseline model produced labels, which are not accurate enough. GT masks shown in the figure are manually annotated by the authors, and they are not used for training (`src/annotation_utils/annotation_gui.py` is used here). The model's performance is significantly affected by the quality of the training labels, and using labels generated from a baseline model without manual verification or correction can lead to inaccuracies in segmentation.
@@ -258,7 +259,7 @@ Therefore, future work should focus on automatically generating high-quality lab
 <br>
 
 
-# References
+## References
 
 [1] [SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers
 ](https://arxiv.org/abs/2105.15203) \
@@ -266,7 +267,7 @@ Therefore, future work should focus on automatically generating high-quality lab
 
 <br>
 
-# Acknowledgements
+## Acknowledgements
 
 2025 Spring, Creative Integrated Design 2 class, Seoul National University, South Korea.
 This project is supported by the SNU Creative Integrated Design 2 class and [Aram Huvis Co., Ltd](https://www.aramhuvis.com/). Collaborative effort were made with the following students:
