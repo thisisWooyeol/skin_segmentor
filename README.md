@@ -155,7 +155,7 @@ python src/evaluation_utils/evaluate.py \
 <br>
 
 
-# Quantitative results
+# Quantitative Results
 
 The following table summarizes the evaluation metrics for our model compared to the baseline on the three test sets: Acne, Hemo (hemoglobin), and Mela (melanin).
 
@@ -234,7 +234,7 @@ A closer analysis reveals how these improvements were achieved for each specific
 <br>
 
 
-# Qualitative results with Gradio
+# Qualitative Results with Gradio
 
 By running the gradio app, you can visualize the qualitative results of our model compared to the baseline.
 
@@ -242,6 +242,17 @@ By running the gradio app, you can visualize the qualitative results of our mode
 uv sync --group demo
 python demo/app_with_comparisons.py
 ```
+
+
+<br>
+
+
+# Limitations and Future Work
+
+![Limitations](./asset/limitation.png)
+While our model shows promising results, poor label quality for training leads to suboptimal performance. Note that SegFormer model is trained with baseline model produced labels, which are not accurate enough. GT masks shown in the figure are manually annotated by the authors, and they are not used for training (`src/annotation_utils/annotation_gui.py` is used here). The model's performance is significantly affected by the quality of the training labels, and using labels generated from a baseline model without manual verification or correction can lead to inaccuracies in segmentation.
+
+Therefore, future work should focus on automatically generating high-quality labels for training, which can significantly enhance the model's performance. Additionally, further hyperparameter tuning and model architecture adjustments may yield better results.
 
 
 <br>
