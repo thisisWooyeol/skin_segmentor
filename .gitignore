@@ -9,10 +9,6 @@ wheels/
 # Virtual environments
 .venv
 
-# Example images
-examples/inputs/
-data/
-
 # log outputs
 checkpoints/
 wandb/
