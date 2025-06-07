@@ -5,6 +5,19 @@ This repository provides a skin segmentor based on the SegFormer model. As an ex
 
 <br>
 
+
+# Interactive Demo
+
+By running gradio app, you can run inference with your own image.
+
+```bash
+python demo/app.py
+```
+
+
+<br>
+
+
 # Get Started
 ## 0. Installation
 
@@ -120,11 +133,11 @@ python src/evaluation_utils/evaluate.py \
 python src/evaluation_utils/evaluate.py \
   --gt_dir ../testcases/mela_test/label/ \
   --pred_dir ../testcases/mela_test/ours_pred/
-````
+```
 
 To evaluate baseline:
 
-```
+```bash
 python src/evaluation_utils/evaluate.py \
   --gt_dir ../testcases/acne_test/label/ \
   --pred_dir ../testcases/acne_test/baseline_pred/
@@ -140,6 +153,7 @@ python src/evaluation_utils/evaluate.py \
 
 
 <br>
+
 
 # Quantitative results
 
@@ -216,17 +230,22 @@ A closer analysis reveals how these improvements were achieved for each specific
 
 - Hemo & Mela: For these datasets, the performance improvement is led by an increase in recall. This is especially noticeable in the Mela set, where recall jumped to 0.3731 from the baseline's 0.2469. This shows that the "Ours" model is substantially better at detecting the positive regions (True Positives), which was the key factor in improving the overall Dice and IoU scores for these more challenging segmentation tasks.
 
+
 <br>
 
-# Interactive demo
 
-By running gradio app, you can run inference with your own image.
+# Qualitative results with Gradio
+
+By running the gradio app, you can visualize the qualitative results of our model compared to the baseline.
 
 ```bash
-python demo/app.py
+uv sync --group demo
+python demo/app_with_comparisons.py
 ```
 
+
 <br>
+
 
 # References
 
