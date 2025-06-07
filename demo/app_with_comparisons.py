@@ -29,7 +29,6 @@ DATASET_NAMES = {
 DATASET_ITEMS = {
     "acne": [
         "item_00212",
-        "item_00236",
         "item_00426",
         "item_00538",
         "item_00570",
@@ -140,15 +139,15 @@ def run_comparison(task_type: TASK_TYPE, item: str):
     ours_img = overlay_mask(image, pred_mask)
 
     metrics_data = [
-        [round(base_metrics[0], 3), round(base_metrics[1], 3), round(base_metrics[2], 3)],
-        [round(ours_metrics[0], 3), round(ours_metrics[1], 3), round(ours_metrics[2], 3)],
+        ["Baseline", round(base_metrics[0], 3), round(base_metrics[1], 3), round(base_metrics[2], 3)],
+        ["Ours", round(ours_metrics[0], 3), round(ours_metrics[1], 3), round(ours_metrics[2], 3)],
     ]
     return orig_img, gt_img, base_img, ours_img, metrics_data
 
 
 def update_items(task_type: TASK_TYPE):
     items = DATASET_ITEMS[task_type]
-    return gr.Dropdown.update(choices=items, value=items[0])
+    return gr.Dropdown(choices=items, value=items[0])
 
 
 def main():
@@ -173,7 +172,7 @@ def main():
             with gr.Column():
                 out_base = gr.Image(label="Baseline Prediction")
                 out_ours = gr.Image(label="Ours Prediction")
-        out_metrics = gr.Dataframe(headers=["Precision", "Recall", "Dice"], row_count=2)
+        out_metrics = gr.Dataframe(headers=["Method", "Precision", "Recall", "Dice"], row_count=2)
         run_btn.click(fn=run_comparison, inputs=[task_radio, item_dd], outputs=[out_orig, out_gt, out_base, out_ours, out_metrics])
     return demo
 
