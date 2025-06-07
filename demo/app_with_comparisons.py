@@ -1,6 +1,6 @@
 import logging
-from typing import Literal
 from pathlib import Path
+from typing import Literal
 
 import gradio as gr
 import numpy as np
@@ -26,43 +26,33 @@ DATASET_NAMES = {
     "hemo": "hemo_test",
     "mela": "mela_test",
 }
-DATASET_ITEMS = {
-    "acne": [
-        "item_00212",
-        "item_00426",
-        "item_00538",
-        "item_00570",
-        "item_00596",
-        "item_00652",
-        "item_00663",
-        "item_00768",
-        "item_00958",
-    ],
-    "hemo": [
-        "item_00001",
-        "item_00003",
-        "item_00012",
-        "item_00013",
-        "item_00021",
-        "item_00033",
-        "item_00036",
-        "item_00039",
-        "item_00046",
-        "item_00054",
-    ],
-    "mela": [
-        "item_00006",
-        "item_00013",
-        "item_00055",
-        "item_00090",
-        "item_00138",
-        "item_00209",
-        "item_00216",
-        "item_00227",
-        "item_00270",
-        "item_00306",
-    ],
-}
+
+
+def load_dataset_items(assets_root_path: Path, dataset_names_map: dict) -> dict:
+    """Loads dataset item names by scanning the image directories."""
+    dataset_items = {}
+    for task_type, dataset_folder_name in dataset_names_map.items():
+        image_dir = assets_root_path / dataset_folder_name / "image"
+        if image_dir.exists() and image_dir.is_dir():
+            items = sorted([p.stem for p in image_dir.glob("*.png")])
+            dataset_items[task_type] = items
+            logger.info(
+                f"Found {len(items)} items for task '{task_type}' in {image_dir}"
+            )
+        else:
+            logger.warning(
+                f"Image directory not found for task '{task_type}': {image_dir}"
+            )
+            dataset_items[task_type] = []
+    return dataset_items
+
+
+DATASET_ITEMS = load_dataset_items(ASSETS_ROOT, DATASET_NAMES)
+
+# Global model and processor
+_GLOBAL_MODEL = None
+_GLOBAL_PROCESSOR = None
+_CURRENT_TASK_TYPE = None
 
 
 def load_mask(path: Path) -> np.ndarray:
@@ -93,7 +83,7 @@ def overlay_mask(image: Image.Image, mask: np.ndarray) -> Image.Image:
 
 
 def predict_mask(image: Image.Image, model, image_processor) -> np.ndarray:
-    inputs = image_processor(images=[image], return_tensors="pt").to("cuda")
+    inputs = image_processor(images=[image], return_tensors="pt").to("mps")
     with torch.no_grad():
         outputs = model(**inputs)
     seg = image_processor.post_process_semantic_segmentation(
@@ -103,19 +93,42 @@ def predict_mask(image: Image.Image, model, image_processor) -> np.ndarray:
     return (seg == 1).astype(np.uint8)
 
 
-def load_model(task_type: TASK_TYPE):
+def get_model_and_processor(task_type: TASK_TYPE):
+    global _GLOBAL_MODEL, _GLOBAL_PROCESSOR, _CURRENT_TASK_TYPE
+
+    if task_type == _CURRENT_TASK_TYPE and _GLOBAL_MODEL is not None:
+        logger.info(f"Using cached model for task: {task_type}")
+        return _GLOBAL_MODEL, _GLOBAL_PROCESSOR
+
+    logger.info(f"Loading model for task: {task_type}")
     if task_type == "acne":
         checkpoint = "checkpoints/segformer-b5-focal+dice-acne50kdata-10ksteps"
     elif task_type == "hemo":
         checkpoint = "checkpoints/segformer-b5-focal+dice-hemo6.6kdata-10ksteps"
-    else:
+    else:  # mela
         checkpoint = "checkpoints/segformer-b5-focal+dice-mela32kdata-10ksteps"
 
     device = "cuda"
-    model = AutoModelForSemanticSegmentation.from_pretrained(checkpoint, device_map=device)
-    image_processor = AutoImageProcessor.from_pretrained(checkpoint)
-    logger.info(f"Loaded model from {checkpoint}")
-    return model, image_processor
+    try:
+        model = AutoModelForSemanticSegmentation.from_pretrained(
+            checkpoint, device_map=device
+        )
+        image_processor = AutoImageProcessor.from_pretrained(checkpoint)
+        _GLOBAL_MODEL = model
+        _GLOBAL_PROCESSOR = image_processor
+        _CURRENT_TASK_TYPE = task_type
+        logger.info(f"Successfully loaded model from {checkpoint} for task {task_type}")
+    except Exception as e:
+        logger.error(f"Error loading model for task {task_type} from {checkpoint}: {e}")
+        # Fallback or re-raise, depending on desired error handling
+        # For now, if a model fails to load, subsequent calls might try again or fail
+        # Setting them to None ensures a reload attempt if task type changes or on next call
+        _GLOBAL_MODEL = None
+        _GLOBAL_PROCESSOR = None
+        _CURRENT_TASK_TYPE = None
+        raise  # Re-raise the exception to make the failure visible
+
+    return _GLOBAL_MODEL, _GLOBAL_PROCESSOR
 
 
 def run_comparison(task_type: TASK_TYPE, item: str):
@@ -129,7 +142,25 @@ def run_comparison(task_type: TASK_TYPE, item: str):
     base_mask = load_mask(base_path)
     base_metrics = compute_metrics(base_mask, gt_mask)
 
-    model, proc = load_model(task_type)
+    model, proc = get_model_and_processor(task_type)
+    if model is None or proc is None:
+        # Handle case where model loading failed
+        # For Gradio, you might want to return an error message or placeholder images
+        error_message = "Model failed to load. Please check logs."
+        # Create a dummy PIL Image with error text
+        error_img = Image.new("RGB", (256, 256), color="red")
+        from PIL import ImageDraw
+
+        d = ImageDraw.Draw(error_img)
+        d.text((10, 10), error_message, fill=(255, 255, 0))
+        return (
+            image,
+            error_img,
+            error_img,
+            error_img,
+            [["Error", "-", "-", error_message]],
+        )
+
     pred_mask = predict_mask(image, model, proc)
     ours_metrics = compute_metrics(pred_mask, gt_mask)
 
@@ -139,8 +170,18 @@ def run_comparison(task_type: TASK_TYPE, item: str):
     ours_img = overlay_mask(image, pred_mask)
 
     metrics_data = [
-        ["Baseline", round(base_metrics[0], 3), round(base_metrics[1], 3), round(base_metrics[2], 3)],
-        ["Ours", round(ours_metrics[0], 3), round(ours_metrics[1], 3), round(ours_metrics[2], 3)],
+        [
+            "Baseline",
+            round(base_metrics[0], 3),
+            round(base_metrics[1], 3),
+            round(base_metrics[2], 3),
+        ],
+        [
+            "Ours",
+            round(ours_metrics[0], 3),
+            round(ours_metrics[1], 3),
+            round(ours_metrics[2], 3),
+        ],
     ]
     return orig_img, gt_img, base_img, ours_img, metrics_data
 
@@ -161,8 +202,12 @@ def main():
             gr.Markdown("# 🔍 Aramhuvis x SNU: Segment Your Skin!")
             gr.Markdown("### Comparison with Baseline")
         with gr.Row():
-            task_radio = gr.Radio(["acne", "hemo", "mela"], value="acne", label="Select Task")
-            item_dd = gr.Dropdown(DATASET_ITEMS["acne"], value=DATASET_ITEMS["acne"][0], label="Image")
+            task_radio = gr.Radio(
+                ["acne", "hemo", "mela"], value="acne", label="Select Task"
+            )
+            item_dd = gr.Dropdown(
+                DATASET_ITEMS["acne"], value=DATASET_ITEMS["acne"][0], label="Image"
+            )
         task_radio.change(fn=update_items, inputs=task_radio, outputs=item_dd)
         run_btn = gr.Button("Run")
         with gr.Row():
@@ -172,8 +217,26 @@ def main():
             with gr.Column():
                 out_base = gr.Image(label="Baseline Prediction")
                 out_ours = gr.Image(label="Ours Prediction")
-        out_metrics = gr.Dataframe(headers=["Method", "Precision", "Recall", "Dice"], row_count=2)
-        run_btn.click(fn=run_comparison, inputs=[task_radio, item_dd], outputs=[out_orig, out_gt, out_base, out_ours, out_metrics])
+        out_metrics = gr.Dataframe(
+            headers=["Method", "Precision", "Recall", "Dice"], row_count=2
+        )
+        run_btn.click(
+            fn=run_comparison,
+            inputs=[task_radio, item_dd],
+            outputs=[out_orig, out_gt, out_base, out_ours, out_metrics],
+        )
+
+    # Pre-load the model for the default task type
+    default_task_type = "acne"  # Matches the initial value of task_radio
+    logger.info(f"Pre-loading model for default task: {default_task_type}")
+    try:
+        get_model_and_processor(default_task_type)
+    except Exception as e:
+        logger.error(
+            f"Failed to pre-load model for default task {default_task_type}: {e}"
+        )
+        # The app will still launch, but the first run might be slow or fail if model remains unloaded.
+
     return demo
 
 
