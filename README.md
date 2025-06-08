@@ -2,6 +2,7 @@
 
 This repository provides a skin segmentor based on the SegFormer model. As an extension of the original SegFormer, this implementation is specifically designed for three classes: acne, hemoglobin and melanin. 
 
+![Overview](./asset/overview.png)
 
 <br>
 
