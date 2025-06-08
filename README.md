@@ -20,7 +20,7 @@ python demo/app.py
 <br>
 
 
-## Get started
+## Getting started
 ### 0. Installation
 
 Please install `uv` from [here](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already.
