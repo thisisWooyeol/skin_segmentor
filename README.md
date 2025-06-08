@@ -237,7 +237,9 @@ A closer analysis reveals how these improvements were achieved for each specific
 
 ## Qualitative results with gradio app
 
-By running the gradio app, you can visualize the qualitative results of our model compared to the baseline.
+![Qualitative Results](./asset/qualitative.png)
+
+By running the gradio app, you can visualize more qualitative results of our model compared to the baseline.
 
 ```bash
 uv sync --group demo
